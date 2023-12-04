@@ -23,7 +23,7 @@ Actual results:
 5. header_links = ['News', 'Transfer News', 'Premier League', 'European Leagues', 'Champions League', 'Women', 'Features']
 6. links_to_assert = ["Premier League", "Champions League", "FanVoice", "The Switch", "EFL",
                      "La Liga", "Serie A", "More", "Transfers", ]
-7.   AssertionError: 'FanVoice' link is not displayed in the header menu
+7. AssertionError: 'FanVoice' link is not displayed in the header menu
           assert 'FanVoice' in ['News', 'Transfer News', 'Premier League', 'European Leagues', 'Champions League', 'Women', ...]
 
 """
