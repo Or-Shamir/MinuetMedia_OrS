@@ -1,8 +1,4 @@
 """
-For each test you develop, you should add documentation (test steps, expected
-results, actual results).
-
-
 Test steps:
 1. I want to start by verifying that the DB is
    Indeed empty. I will start in a 'get_all_api' request to check it.
@@ -85,59 +81,59 @@ Test steps:
 
 """
 
+
 import pytest
 import requests
 
 api_url = "http://localhost:5000/users"
+data_1_user = {"name": "Wall-E46765","id": "666"}
+data_multi_users = [{"name": "Omri", "id": "2"}, {"name": "Gaia", "id": "3"}, {"name": "Alon", "id": "4"}, {"name": "Wall-E", "id": "5"}]
 
 
-@pytest.fixture(scope="module")
 def validate_db_empty():
-    response_empty = requests.get("http://localhost:5000/users")
+    # can be used as a 'setup' fixture
+    response_empty = requests.get(api_url)
     assert response_empty.text == ""
 
 
 @pytest.fixture
 def post_api():
     # Post 1 user #
-    data = {"name": "Wall-E46765","id": "666"}
-    response_post = requests.post(api_url, json=data)
-    print(response_post.text)
-    print(response_post.status_code)
+    response_post = requests.post(api_url, json=data_1_user)
+    print(response_post.text, response_post.status_code)
     return response_post
 
 
 @pytest.fixture
 def get_api():
     # Get 1 user #
-    response_get = requests.get("http://localhost:5000/users"+"/Wall-E46765")
-    print(response_get.text)
+    response_get = requests.get(api_url+"/Wall-E46765")
+    print(response_get.text, response_get.status_code)
     return response_get.text
 
 
 @pytest.fixture
 def get_all_api():
     # Get all users #
-    response_get_all_users = requests.get("http://localhost:5000/users")
-    print(response_get_all_users.text)
+    response_get_all_users = requests.get(api_url)
+    print(response_get_all_users.text, response_get_all_users.status_code)
     return response_get_all_users.text
 
 
 @pytest.fixture
 def put_api():
     # Put - edit user #
-    # trying to change the name of the user
-    data = {"name": "Yair", "id": "666"}
-    response_put = requests.put("http://localhost:5000/users/666", json=data)
-    print(response_put.text)
+    data_put = {"name": "Yair", "id": "666"}
+    response_put = requests.put(api_url + "/666", json=data_put)
+    print(response_put.text, response_put.status_code)
     return response_put.text
 
 
 @pytest.fixture
 def delete_api():
     # Delete a user #
-    response_delete = requests.delete("http://localhost:5000/users/666")
-    print(response_delete.text)
+    response_delete = requests.delete(api_url + "/666")
+    print(response_delete.text, response_delete.status_code)
     return response_delete.text
 
 
