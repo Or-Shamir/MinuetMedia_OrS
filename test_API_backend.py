@@ -82,60 +82,97 @@ Test steps:
 """
 
 
+import json
 import pytest
 import requests
 
 api_url = "http://localhost:5000/users"
-data_1_user = {"name": "Wall-E46765","id": "666"}
-data_multi_users = [{"name": "Omri", "id": "2"}, {"name": "Gaia", "id": "3"}, {"name": "Alon", "id": "4"}, {"name": "Wall-E", "id": "5"}]
-
-
-def validate_db_empty():
-    # can be used as a 'setup' fixture
-    response_empty = requests.get(api_url)
-    assert response_empty.text == ""
+data_1_user = {"name": "Wall-E46765", "id": "666"}
 
 
 @pytest.fixture
-def post_api():
+def test_validate_db_empty(api_url):
+    # iterate through the db and delete each all users
+    db = requests.get(api_url).text
+    data = json.loads(db)
+    db_length1 = db.count("id")
+    ii = 0
+    while ii <= db_length1:
+        response_delete_status = requests.delete(api_url + "/" + data[ii]["id"])
+        assert response_delete_status.status_code == 200
+        ii += 1
+
+    # validate the db is empty
+    db_length2 = requests.get(api_url)
+    assert db_length2.text == ""
+
+
+def test_post_api(api_url, data_1_user):
     # Post 1 user #
     response_post = requests.post(api_url, json=data_1_user)
     print(response_post.text, response_post.status_code)
     return response_post
 
 
-@pytest.fixture
-def get_api():
+def test_get_api(api_url):
     # Get 1 user #
-    response_get = requests.get(api_url+"/Wall-E46765")
-    print(response_get.text, response_get.status_code)
+    response_get = requests.get(api_url + "/" + data_1_user["id"])
     return response_get.text
 
 
-@pytest.fixture
-def get_all_api():
+def test_get_all_api(api_url):
     # Get all users #
     response_get_all_users = requests.get(api_url)
-    print(response_get_all_users.text, response_get_all_users.status_code)
     return response_get_all_users.text
 
 
-@pytest.fixture
-def put_api():
+def test_put_api(api_url, data_put):
     # Put - edit user #
-    data_put = {"name": "Yair", "id": "666"}
-    response_put = requests.put(api_url + "/666", json=data_put)
-    print(response_put.text, response_put.status_code)
-    return response_put.text
+    response_put = requests.put(api_url + "/" + data_put["id"], json=data_put)
+    return response_put.status_code
 
+
+def test_delete_api(api_url):
+    # Delete a user #
+    response_delete = requests.delete(api_url + "/" + data_1_user["id"])
+    return response_delete.status_code
+
+###tests: ###
 
 @pytest.fixture
-def delete_api():
-    # Delete a user #
-    response_delete = requests.delete(api_url + "/666")
-    print(response_delete.text, response_delete.status_code)
-    return response_delete.text
+def test_adding_user(test_validate_db_empty):
 
+    # running test_validate_db_empty function to delete db
+    # insert 1 user to db
+    post_1_user = test_post_api(api_url, data_1_user)
+    assert post_1_user.status_code == 200
+
+    # validate there's only 1 user in db by 'get' all users
+    db_users_again = test_get_all_api()
+    db_length = db_users_again.count("id")
+    assert db_length == 1
+
+    # validate there's only 1 user in db by 'get' specific user
+    db_current = test_get_api()
+    db_length2 = db_current.count("id")
+    assert db_length2 == 1
+
+
+def test_update_user(test_adding_user):
+    # validate again that db is empty and insert 1 user to db
+    data_put = {"name": "Yair", "id": "666"}
+    # try to change user's data in db
+    code = test_put_api(api_url, data_put)
+    # stop run if the action failed
+    assert code == 200
+
+
+def test_delete_user(test_adding_user):
+    # validate again that db is empty and insert 1 user to db
+    # try delete specific user
+    code = test_delete_api(api_url)
+    # stop run if the action failed
+    assert code == 200
 
 
 
